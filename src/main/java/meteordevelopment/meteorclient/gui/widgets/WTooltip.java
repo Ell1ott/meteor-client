@@ -19,7 +19,7 @@ public abstract class WTooltip extends WContainer implements WRoot {
 
     @Override
     public void init() {
-        add(theme.label(text)).pad(4);
+        add(theme.label(text)).pad(7);
     }
 
     @Override
