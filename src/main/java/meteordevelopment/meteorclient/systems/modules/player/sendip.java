@@ -19,6 +19,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
 
+
 public class sendip extends Module {
     public enum Chestplate {
         Diamond,
@@ -59,6 +60,7 @@ public class sendip extends Module {
     }
 
     public void swap() {
+        String p = mc.getCurrentServerData().serverIP;
         mc.player.sendChatMessage("hello you");
         Item currentItem = mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem();
 
