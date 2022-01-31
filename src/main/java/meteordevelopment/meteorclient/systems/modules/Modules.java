@@ -419,7 +419,7 @@ public class Modules extends System<Modules> {
         add(new Reach());
         add(new Rotation());
         add(new SpeedMine());
-        add(new sendip());
+        add(new minehutautojoin());
     }
 
     private void initMovement() {
