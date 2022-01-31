@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
@@ -60,7 +61,7 @@ public class sendip extends Module {
     }
 
     public void swap() {
-        String p = mc.getCurrentServerData().serverIP;
+        
         mc.player.sendChatMessage("hello you");
         Item currentItem = mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem();
 
