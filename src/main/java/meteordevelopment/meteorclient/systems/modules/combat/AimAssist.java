@@ -25,6 +25,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 
+import meteordevelopment.meteorclient.utils.player.Rotations;
+
 public class AimAssist extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSpeed = settings.createGroup("Aim Speed");
@@ -92,6 +94,9 @@ public class AimAssist extends Module {
         super(Categories.Combat, "aim-assist", "Automatically aims at entities.");
     }
 
+
+ 
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
         target = TargetUtils.get(entity -> {
@@ -129,28 +134,35 @@ public class AimAssist extends Module {
         double angle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
         double deltaAngle;
         double toRotate;
+        double toRotatep;
+        double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+        double pangle = -Math.toDegrees(Math.atan2(deltaY, idk));
 
         if (instant) {
             mc.player.setYaw((float) angle);
+            mc.player.setPitch((float) pangle);
         } else {
+            // Yaw ---------------------------------------
             deltaAngle = MathHelper.wrapDegrees(angle - mc.player.getYaw());
             toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
             if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
-            mc.player.setYaw(mc.player.getYaw() + (float) toRotate);
-        }
+            
+            // Pitch -------------------------------------
+            deltaAngle = MathHelper.wrapDegrees(pangle - mc.player.getPitch());
+            toRotatep = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
+            if ((toRotatep >= 0 && toRotatep > deltaAngle) || (toRotatep < 0 && toRotatep < deltaAngle)) toRotate = deltaAngle;
+            
+            
+            // mc.player.setYaw(mc.player.getYaw() + (float) toRotate);
+            // mc.player.setPitch(mc.player.getPitch() + (float) toRotatep);
 
+            Rotations.rotate(mc.player.getYaw() + (float) toRotate, mc.player.getPitch() + (float) toRotatep);
+        }
+        
         // Pitch
-        double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-        angle = -Math.toDegrees(Math.atan2(deltaY, idk));
 
-        if (instant) {
-            mc.player.setPitch((float) angle);
-        } else {
-            deltaAngle = MathHelper.wrapDegrees(angle - mc.player.getPitch());
-            toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
-            if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
-            mc.player.setPitch(mc.player.getPitch() + (float) toRotate);
-        }
+
+
     }
 
     @Override
