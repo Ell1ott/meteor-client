@@ -136,13 +136,13 @@ public class NoFall extends Module {
 
         // Bucket mode
         if (mode.get() == Mode.Bucket) {
+            BlockHitResult result = null; // = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
                 // Place water
                 FindItemResult waterBucket = InvUtils.findInHotbar(Items.WATER_BUCKET);
 
                 if (!waterBucket.found()) return;
 
-                BlockHitResult result = null; // = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
                 BlockHitResult mresult = null; // = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
 
                 // Center player
@@ -150,8 +150,9 @@ public class NoFall extends Module {
                 if (anchor.get()) PlayerUtils.centerPlayer();
                 for (int x = 0; x < 2; x++) {
                     for (int y = 0; y < 2; y++) {
-                        mresult = mc.world.raycast(new RaycastContext(mc.player.getPos().subtract(x * 1.2 - 0.6, 0, y * 1.2 - 0.6), mc.player.getPos().subtract(x * 1.2 - 0.6, 5, y * 1.2 - 0.6), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+                        mresult = mc.world.raycast(new RaycastContext(mc.player.getPos().subtract(x * 0.8 - 0.4, 0, y * 0.8 - 0.4), mc.player.getPos().subtract(x * 0.8 - 0.4, 5, y * 0.8 - 0.4), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
                         // if (mresult != null && mresult.getType() == HitResult.Type.BLOCK){
+
 
                         //     if (result == null && mresult.getType() == HitResult.Type.BLOCK){
                         //         result = mresult;
@@ -162,13 +163,14 @@ public class NoFall extends Module {
                         // }
 
 
+                        mc.player.sendChatMessage(String.valueOf(x));
                         if (mresult != null && mresult.getType() == HitResult.Type.BLOCK) {
-                            mc.player.sendChatMessage(String.valueOf(mresult.getBlockPos().getY()));
                             if (result == null){
                                 result = mresult;
                             }
                             else if (mresult.getBlockPos().getY() > result.getBlockPos().getY()) {
                                 result = mresult;
+
 
                             }
                         }
@@ -182,7 +184,7 @@ public class NoFall extends Module {
 
                 // Place water
                 if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                    useBucket(new Vec3d(result.getBlockPos().getX(), result.getBlockPos().getY(), result.getBlockPos().getZ()),
+                    useBucket(tovec3d(result),
                     waterBucket,
                     true);
                 }
@@ -190,15 +192,24 @@ public class NoFall extends Module {
             }
             // Remove water
             if (placedWater && mc.player.getBlockStateAtPos().getFluidState().getFluid() == Fluids.WATER) {
-                // useBucket(InvUtils.findInHotbar(Items.BUCKET), false);
+                // useBucket(tovec3d(result), InvUtils.findInHotbar(Items.BUCKET), false);
             }
         }
     }
 
-    private void useBucket( Vec3d placepos, FindItemResult bucket, boolean placedWater) {
+    private Vec3d tovec3d(BlockHitResult r) {
+        return new Vec3d(
+            r.getBlockPos().getX(),
+            r.getBlockPos().getY(),
+            r.getBlockPos().getZ());
+    }
+
+    private void useBucket(Vec3d placepos, FindItemResult bucket, boolean placedWater) {
         if (!bucket.found()) return;
 
         Rotations.rotate(Rotations.getYaw(placepos), Rotations.getPitch(placepos), 100, true, () -> {
+            mc.player.sendChatMessage(placepos.toString());
+
             if (bucket.isOffhand()) {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
             } else {
