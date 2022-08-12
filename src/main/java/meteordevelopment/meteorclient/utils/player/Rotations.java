@@ -46,8 +46,8 @@ public class Rotations {
     private static boolean sentLastRotation;
     public static boolean rotating = false;
 
-    public static double pYaw;
-    public static double pPitch;
+    public static double pYaw = -1000;
+    public static double pPitch = -1000;
 
     @PreInit
     public static void init() {
@@ -57,7 +57,6 @@ public class Rotations {
     public static void rotate(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
 
         // if (mc.cameraEntity != mc.player) {mc.player.sendChatMessage("nice", null);}
-        Rotation rotation = rotationPool.get();
 
         int speed = Config.get().Speed.get();
         if (Config.get().Smooth.get()){
@@ -74,8 +73,6 @@ public class Rotations {
 
             mc.player.sendChatMessage(new Double(yawdis).toString(), null);
 
-
-
             yaw = pYaw + closestToZero(speed, yawdis);
             pitch = pPitch + closestToZero(speed, pitchdis);
 
@@ -85,15 +82,16 @@ public class Rotations {
             // setCamRotation(yaw, pitch);
         }
 
+        Rotation rotation = rotationPool.get();
         rotation.set(yaw, pitch, priority, clientSide, callback);
 
 
-        // int i = 0;
-        // for (; i < rotations.size(); i++) {
-        //     if (priority > rotations.get(i).priority) break;
-        // }
+        int i = 0;
+        for (; i < rotations.size(); i++) {
+            if (priority > rotations.get(i).priority) break;
+        }
 
-        // rotations.add(i, rotation);
+        rotations.add(i, rotation);
     }
 
 
@@ -205,7 +203,7 @@ public class Rotations {
         rotationTimer++;
         if (mc.world != null){
 
-            mc.player.sendChatMessage(new Boolean(rotating).toString(), null);
+            // mc.player.sendChatMessage(new Boolean(rotating).toString(), null);
 
             if (!rotating){
                 pYaw = mc.player.getYaw();
