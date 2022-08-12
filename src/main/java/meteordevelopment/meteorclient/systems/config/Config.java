@@ -20,6 +20,9 @@ import net.minecraft.nbt.NbtString;
 import java.util.ArrayList;
 import java.util.List;
 
+// import org.jcp.xml.dsig.internal.SignerOutputStream;
+import org.objectweb.asm.signature.SignatureVisitor;
+
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Config extends System<Config> {
@@ -28,6 +31,7 @@ public class Config extends System<Config> {
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgChat = settings.createGroup("Chat");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
+    private final SettingGroup sgRot = settings.createGroup("Rotation");
 
     // Visual
 
@@ -133,6 +137,25 @@ public class Config extends System<Config> {
         .defaultValue(true)
         .build()
     );
+    public final Setting<Boolean> Smooth = sgRot.add(new BoolSetting.Builder()
+        .name("Smooth")
+        .description("Should the player rotate smoothly")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Integer>  Speed = sgRot.add(new IntSetting.Builder()
+    .name("Rotation Speed")
+    .description("how fast the player should be rotating")
+    .defaultValue(4)
+    .min(1)
+    .sliderMax(100)
+    .build()
+    );
+
+    // void updsm(){
+    //     Rotations.updatesmooth(smooth.get());
+    // }
 
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 

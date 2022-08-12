@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.starscript.compiler.Expr.Null;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
@@ -24,6 +25,10 @@ import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
+import java.lang.Math;
+
+
+
 public class Rotations {
     private static final Pool<Rotation> rotationPool = new Pool<>(Rotation::new);
     private static final List<Rotation> rotations = new ArrayList<>();
@@ -33,10 +38,14 @@ public class Rotations {
     private static float preYaw, prePitch;
     private static int i = 0;
 
+
     private static Rotation lastRotation;
     private static int lastRotationTimer;
     private static boolean sentLastRotation;
     public static boolean rotating = false;
+
+    public static double pYaw = -1000;
+    public static double pPitch = -1000;
 
     @PreInit
     public static void init() {
@@ -45,7 +54,33 @@ public class Rotations {
 
     public static void rotate(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
         Rotation rotation = rotationPool.get();
+
+        // if (mc.cameraEntity != mc.player) {mc.player.sendChatMessage("nice", null);}
+
+        int speed = Config.get().Speed.get();
+        if (Config.get().Smooth.get()){
+            if (pPitch == -1000) {pPitch = mc.player.getPitch();
+                                  pYaw = mc.player.getPitch();}
+
+
+            double yawdis = yaw - pYaw;
+            double pitchdis = pitch - pPitch;
+
+            if (yawdis < -180) {yawdis =+ 360;}
+            if (yawdis > 180) {yawdis =- 360;}
+
+            yaw = pYaw + Math.min(speed, yawdis);
+            pitch = pPitch + Math.min(speed, pitchdis);
+
+            pYaw = yaw;
+            pPitch = pitch;
+
+            mc.player.sendChatMessage(new Double(mc.cameraEntity.getYaw()).toString(), null);
+            setCamRotation(yaw, pitch);
+        }
+
         rotation.set(yaw, pitch, priority, clientSide, callback);
+
 
         int i = 0;
         for (; i < rotations.size(); i++) {
@@ -55,8 +90,12 @@ public class Rotations {
         rotations.add(i, rotation);
     }
 
+
+
+
+
     public static void rotate(double yaw, double pitch, int priority, Runnable callback) {
-        rotate(yaw, pitch, priority, false, callback);
+        rotate(yaw, pitch, priority, true, callback);
     }
 
     public static void rotate(double yaw, double pitch, Runnable callback) {
