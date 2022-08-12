@@ -75,7 +75,7 @@ public class Rotations {
             pYaw = yaw;
             pPitch = pitch;
 
-            mc.player.sendChatMessage(new Double(mc.cameraEntity.getYaw()).toString(), null);
+            // mc.player.sendChatMessage(new Double(mc.cameraEntity.getYaw()).toString(), null);
             setCamRotation(yaw, pitch);
         }
 
@@ -194,6 +194,10 @@ public class Rotations {
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
         rotationTimer++;
+
+        // mc.player.sendChatMessage(new Boolean(rotating).toString(), null);
+
+
     }
 
     public static double getYaw(Entity entity) {
