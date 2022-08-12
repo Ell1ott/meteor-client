@@ -46,8 +46,8 @@ public class Rotations {
     private static boolean sentLastRotation;
     public static boolean rotating = false;
 
-    public static double pYaw = -1000;
-    public static double pPitch = -1000;
+    public static double pYaw;
+    public static double pPitch;
 
     @PreInit
     public static void init() {
@@ -55,9 +55,9 @@ public class Rotations {
     }
 
     public static void rotate(double yaw, double pitch, int priority, boolean clientSide, Runnable callback) {
-        Rotation rotation = rotationPool.get();
 
         // if (mc.cameraEntity != mc.player) {mc.player.sendChatMessage("nice", null);}
+        Rotation rotation = rotationPool.get();
 
         int speed = Config.get().Speed.get();
         if (Config.get().Smooth.get()){
@@ -74,8 +74,10 @@ public class Rotations {
 
             mc.player.sendChatMessage(new Double(yawdis).toString(), null);
 
-            yaw = pYaw + Math.min(speed, yawdis);
-            pitch = pPitch + Math.min(speed, pitchdis);
+
+
+            yaw = pYaw + closestToZero(speed, yawdis);
+            pitch = pPitch + closestToZero(speed, pitchdis);
 
             pYaw = yaw;
             pPitch = pitch;
@@ -86,16 +88,19 @@ public class Rotations {
         rotation.set(yaw, pitch, priority, clientSide, callback);
 
 
-        int i = 0;
-        for (; i < rotations.size(); i++) {
-            if (priority > rotations.get(i).priority) break;
-        }
+        // int i = 0;
+        // for (; i < rotations.size(); i++) {
+        //     if (priority > rotations.get(i).priority) break;
+        // }
 
-        rotations.add(i, rotation);
+        // rotations.add(i, rotation);
     }
 
 
+    public static double closestToZero(int num, Double num2){
+        return (int) Math.signum(num2) * (Math.min(num, Math.abs(num2)));
 
+    }
 
 
     public static void rotate(double yaw, double pitch, int priority, Runnable callback) {
@@ -200,7 +205,7 @@ public class Rotations {
         rotationTimer++;
         if (mc.world != null){
 
-            // mc.player.sendChatMessage(new Boolean(rotating).toString(), null);
+            mc.player.sendChatMessage(new Boolean(rotating).toString(), null);
 
             if (!rotating){
                 pYaw = mc.player.getYaw();
