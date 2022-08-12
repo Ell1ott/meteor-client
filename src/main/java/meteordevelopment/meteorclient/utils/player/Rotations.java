@@ -23,6 +23,8 @@ import net.minecraft.util.math.Vec3d;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderFogComponent.None;
+
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 import java.lang.Math;
@@ -59,15 +61,18 @@ public class Rotations {
 
         int speed = Config.get().Speed.get();
         if (Config.get().Smooth.get()){
-            if (pPitch == -1000) {pPitch = mc.player.getPitch();
-                                  pYaw = mc.player.getPitch();}
+
 
 
             double yawdis = yaw - pYaw;
             double pitchdis = pitch - pPitch;
 
-            if (yawdis < -180) {yawdis =+ 360;}
-            if (yawdis > 180) {yawdis =- 360;}
+            mc.player.sendChatMessage(new Double(yawdis).toString(), null);
+            if (yawdis < -180) {yawdis = yawdis + 360;}
+            if (yawdis > 180) {yawdis =  yawdis - 360;}
+
+
+            mc.player.sendChatMessage(new Double(yawdis).toString(), null);
 
             yaw = pYaw + Math.min(speed, yawdis);
             pitch = pPitch + Math.min(speed, pitchdis);
@@ -75,8 +80,7 @@ public class Rotations {
             pYaw = yaw;
             pPitch = pitch;
 
-            // mc.player.sendChatMessage(new Double(mc.cameraEntity.getYaw()).toString(), null);
-            setCamRotation(yaw, pitch);
+            // setCamRotation(yaw, pitch);
         }
 
         rotation.set(yaw, pitch, priority, clientSide, callback);
@@ -194,8 +198,15 @@ public class Rotations {
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
         rotationTimer++;
+        if (mc.world != null){
 
-        // mc.player.sendChatMessage(new Boolean(rotating).toString(), null);
+            // mc.player.sendChatMessage(new Boolean(rotating).toString(), null);
+
+            if (!rotating){
+                pYaw = mc.player.getYaw();
+                pPitch = mc.player.getPitch();
+            }
+        }
 
 
     }
