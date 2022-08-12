@@ -138,7 +138,7 @@ public class Config extends System<Config> {
         .build()
     );
     public final Setting<Boolean> Smooth = sgRot.add(new BoolSetting.Builder()
-        .name("Smooth")
+        .name("Smooth Rotation")
         .description("Should the player rotate smoothly")
         .defaultValue(false)
         .build()
@@ -150,7 +150,16 @@ public class Config extends System<Config> {
     .defaultValue(4)
     .min(1)
     .sliderMax(100)
+    .visible(() -> Smooth.get())
     .build()
+    );
+
+    private final Setting<RotationMode> rotmode = sgRot.add(new EnumSetting.Builder<RotationMode>()
+        .name("rotate")
+        .description("Determines when you should rotate towards the target.")
+        .defaultValue(RotationMode.linear)
+        .visible(() -> Smooth.get())
+        .build()
     );
 
     // void updsm(){
@@ -196,5 +205,11 @@ public class Config extends System<Config> {
         List<String> list = new ArrayList<>();
         for (NbtElement item : tag.getList(key, 8)) list.add(item.asString());
         return list;
+    }
+
+    public enum RotationMode{
+        linear,
+        smoothstep
+
     }
 }
