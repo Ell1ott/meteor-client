@@ -161,7 +161,7 @@ public class Rotations {
             if (yawdis > 180) {yawdis =  yawdis - 360;}
 
             Double dis = Math.sqrt(Math.pow(yawdis, 2) + Math.pow(pitchdis, 2));
-            mc.player.sendChatMessage("" + dis, null);
+            mc.player.sendChatMessage("" + yawdis / dis, null);
 
 
 
