@@ -68,7 +68,7 @@ public class Rotations {
 
     public static void rotate(double yaw, double pitch, int vpriority, boolean vclientSide, Runnable vcallback) {
 
-        // if (mc.cameraEntity != mc.player) {mc.player.sendChatMessage("nice", null);}
+
         rYaw = yaw;
         rPitch = pitch;
         priority = vpriority;
@@ -86,12 +86,12 @@ public class Rotations {
         //     double yawdis = yaw - pYaw;
         //     double pitchdis = pitch - pPitch;
 
-        //     mc.player.sendChatMessage(new Double(yawdis).toString(), null);
+
         //     if (yawdis < -180) {yawdis = yawdis + 360;}
         //     if (yawdis > 180) {yawdis =  yawdis - 360;}
 
 
-        //     mc.player.sendChatMessage(new Double(yawdis).toString(), null);
+
 
         //     yaw = pYaw + closestToZero(speed, yawdis);
         //     pitch = pPitch + closestToZero(speed, pitchdis);
@@ -130,15 +130,6 @@ public class Rotations {
 
                 rotateto();
 
-
-
-
-                // if (lastRotation != null) {
-                //     if (lastRotationTimer >= Config.get().rotationHoldTicks.get()) {
-                //         resetLastRotation();
-                //         rotating = false;
-                //     } else {
-
             }
             else if (shouldmoveback){
                 rYaw = mc.player.getYaw();
@@ -158,23 +149,24 @@ public class Rotations {
     }
 
     public static void rotateto(){
-        int speed = Config.get().Speed.get();
         if (Config.get().Smooth.get()){
+            int speed = Config.get().Speed.get();
 
 
 
             double yawdis = rYaw - pYaw;
             double pitchdis = rPitch - pPitch;
 
-            mc.player.sendChatMessage("" + lastRotationTimer , null);
             if (yawdis < -180) {yawdis = yawdis + 360;}
             if (yawdis > 180) {yawdis =  yawdis - 360;}
 
+            Double dis = Math.sqrt(Math.pow(yawdis, 2) + Math.pow(pitchdis, 2));
+            mc.player.sendChatMessage("" + dis, null);
 
 
 
-            rYaw = pYaw + closestToZero(speed, yawdis);
-            rPitch = pPitch + closestToZero(speed, pitchdis);
+            rYaw = pYaw + closestToZero((yawdis / dis) * speed, yawdis);
+            rPitch = pPitch + closestToZero((pitchdis / dis) * speed, pitchdis);
 
             pYaw = rYaw;
             pPitch = rPitch;
@@ -196,6 +188,10 @@ public class Rotations {
 
 
     public static double closestToZero(int num, Double num2){
+        return (int) Math.signum(num2) * (Math.min(num, Math.abs(num2)));
+
+    }
+    public static double closestToZero(Double num, Double num2){
         return (int) Math.signum(num2) * (Math.min(num, Math.abs(num2)));
 
     }
