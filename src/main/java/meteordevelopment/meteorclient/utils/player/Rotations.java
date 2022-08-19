@@ -170,9 +170,14 @@ public class Rotations {
             }
 
 
-
-            rYaw = pYaw + closestToZero((yawdis / dis) * speed, yawdis);
-            rPitch = pPitch + closestToZero((pitchdis / dis) * speed, pitchdis);
+            if (yawdis != 0)
+            {
+                rYaw = pYaw + closestToZero((yawdis / dis) * speed, yawdis);
+            }
+            if(pitchdis != 0)
+            {
+                rPitch = pPitch + closestToZero((pitchdis / dis) * speed, pitchdis);
+            }
 
             pYaw = rYaw;
             pPitch = rPitch;
