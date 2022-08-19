@@ -160,8 +160,14 @@ public class Rotations {
             if (yawdis < -180) {yawdis = yawdis + 360;}
             if (yawdis > 180) {yawdis =  yawdis - 360;}
 
-            Double dis = Math.sqrt(Math.pow(yawdis, 2) + Math.pow(pitchdis, 2));
-            mc.player.sendChatMessage("" + yawdis / dis, null);
+            Double dis = Math.sqrt(yawdis * yawdis + pitchdis * pitchdis);
+            if (("" + dis) != "NaN")
+            {
+
+                mc.player.sendChatMessage("dis:" + dis, null);
+                mc.player.sendChatMessage("yaw:" + closestToZero((yawdis / dis) * speed, yawdis), null);
+                mc.player.sendChatMessage("pitch:" + pitchdis, null);
+            }
 
 
 
@@ -188,11 +194,11 @@ public class Rotations {
 
 
     public static double closestToZero(int num, Double num2){
-        return (int) Math.signum(num2) * (Math.min(num, Math.abs(num2)));
+        return (int) Math.signum(num2) * (Math.min(Math.abs(num), Math.abs(num2)));
 
     }
     public static double closestToZero(Double num, Double num2){
-        return (int) Math.signum(num2) * (Math.min(num, Math.abs(num2)));
+        return (int) Math.signum(num2) * (Math.min(Math.abs(num), Math.abs(num2)));
 
     }
 
