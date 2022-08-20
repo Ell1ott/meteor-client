@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.systems.config.Config.RotationMode;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -26,12 +27,16 @@ import org.objectweb.asm.signature.SignatureVisitor;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Config extends System<Config> {
+    // public static final RotationMode[] RotationMode = null;
+
     public final Settings settings = new Settings();
 
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgChat = settings.createGroup("Chat");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRot = settings.createGroup("Rotation");
+    private final SettingGroup sgrea = settings.createGroup("realistic rotation");
+
 
     // Visual
 
@@ -147,20 +152,54 @@ public class Config extends System<Config> {
     public final Setting<Integer>  Speed = sgRot.add(new IntSetting.Builder()
     .name("Rotation Speed")
     .description("how fast the player should be rotating")
-    .defaultValue(4)
+    .defaultValue(1)
     .min(1)
     .sliderMax(100)
     .visible(() -> Smooth.get())
     .build()
     );
 
-    private final Setting<RotationMode> rotmode = sgRot.add(new EnumSetting.Builder<RotationMode>()
+    public final Setting<RotationMode> rotmode = sgRot.add(new EnumSetting.Builder<RotationMode>()
         .name("rotate")
         .description("Determines when you should rotate towards the target.")
         .defaultValue(RotationMode.linear)
         .visible(() -> Smooth.get())
         .build()
     );
+
+    public final Setting<Integer>  p = sgRot.add(new IntSetting.Builder()
+    .name("% (smoothstep)")
+    .description("how much of the dis the player should rotate")
+    .defaultValue(30)
+    .min(1)
+    .sliderMax(100)
+    .visible(() -> rotmode.get() == RotationMode.smoothstep)
+    .build()
+    );
+
+    public final Setting<Integer>  Add = sgRot.add(new IntSetting.Builder()
+    .name("add to procentige (smoothstep)")
+    .description("how much of the there will be added to the procentige")
+    .defaultValue(1)
+    .min(0)
+    .sliderMax(30)
+    .visible(() -> rotmode.get() == RotationMode.smoothstep)
+    .build()
+    );
+
+    public final Setting<Integer>  cap = sgRot.add(new IntSetting.Builder()
+    .name("max speed (smoothstep)")
+    .description("how much of the there will be added to the procentige")
+    .defaultValue(37)
+    .min(1)
+    .sliderMax(100)
+    .visible(() -> rotmode.get() == RotationMode.smoothstep)
+    .build()
+    );
+
+
+
+
 
     // void updsm(){
     //     Rotations.updatesmooth(smooth.get());
@@ -207,7 +246,7 @@ public class Config extends System<Config> {
         return list;
     }
 
-    public enum RotationMode{
+    public static enum RotationMode{
         linear,
         smoothstep
 

@@ -78,41 +78,6 @@ public class Rotations {
         rotating = true;
 
         resetLastRotation();
-        // int speed = Config.get().Speed.get();
-        // if (Config.get().Smooth.get()){
-
-
-
-        //     double yawdis = yaw - pYaw;
-        //     double pitchdis = pitch - pPitch;
-
-
-        //     if (yawdis < -180) {yawdis = yawdis + 360;}
-        //     if (yawdis > 180) {yawdis =  yawdis - 360;}
-
-
-
-
-        //     yaw = pYaw + closestToZero(speed, yawdis);
-        //     pitch = pPitch + closestToZero(speed, pitchdis);
-
-        //     pYaw = yaw;
-        //     pPitch = pitch;
-
-        //     // setCamRotation(yaw, pitch);
-        // }
-
-        // Rotation rotation = rotationPool.get();
-        // rotation.set(yaw, pitch, priority, clientSide, callback);
-
-
-        // int i = 0;
-        // for (; i < rotations.size(); i++) {
-        //     if (priority > rotations.get(i).priority) break;
-        // }
-
-        // rotations.add(i, rotation);
-        // rotating = true;
     }
 
     @EventHandler
@@ -150,7 +115,9 @@ public class Rotations {
 
     public static void rotateto(){
         if (Config.get().Smooth.get()){
+            Double relativespeed = 1.0;
             int speed = Config.get().Speed.get();
+
 
 
 
@@ -161,22 +128,27 @@ public class Rotations {
             if (yawdis > 180) {yawdis =  yawdis - 360;}
 
             Double dis = Math.sqrt(yawdis * yawdis + pitchdis * pitchdis);
-            if (("" + dis) != "NaN")
-            {
 
-                mc.player.sendChatMessage("dis:" + dis, null);
-                mc.player.sendChatMessage("yaw:" + closestToZero((yawdis / dis) * speed, yawdis), null);
-                mc.player.sendChatMessage("pitch:" + pitchdis, null);
+            if(Config.get().rotmode.get() == Config.RotationMode.smoothstep)
+            {
+                relativespeed = Math.min(dis * Config.get().p.get() / 100 + Config.get().Add.get(), Config.get().cap.get());
             }
+            // if (("" + dis) != "NaN")
+            // {
+
+            //     mc.player.sendChatMessage("dis:" + dis, null);
+            //     mc.player.sendChatMessage("yaw:" + closestToZero((yawdis / dis) * speed, yawdis), null);
+            //     mc.player.sendChatMessage("pitch:" + pitchdis, null);
+            // }
 
 
             if (yawdis != 0)
             {
-                rYaw = pYaw + closestToZero((yawdis / dis) * speed, yawdis);
+                rYaw = pYaw + closestToZero((yawdis / dis) * speed * relativespeed, yawdis);
             }
             if(pitchdis != 0)
             {
-                rPitch = pPitch + closestToZero((pitchdis / dis) * speed, pitchdis);
+                rPitch = pPitch + closestToZero((pitchdis / dis) * speed * relativespeed, pitchdis);
             }
 
             pYaw = rYaw;
