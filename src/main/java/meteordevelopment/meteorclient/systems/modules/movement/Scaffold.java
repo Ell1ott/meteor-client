@@ -76,6 +76,13 @@ public class Scaffold extends Module {
         .build()
     );
 
+    private final Setting<Boolean> allowsneak = sgGeneral.add(new BoolSetting.Builder()
+        .name("allow sneak")
+        .description("if its posible to sneak while enabled")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
         .name("air-place")
         .description("Allow air place.")
