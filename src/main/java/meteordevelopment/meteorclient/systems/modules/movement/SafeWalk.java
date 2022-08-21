@@ -9,17 +9,30 @@ import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import meteordevelopment.meteorclient.settings.BlockListSetting;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.RaycastContext;
+
+import meteordevelopment.meteorclient.events.world.TickEvent;
+
 
 import java.util.List;
 
+import com.ibm.icu.util.BytesTrie.Result;
+
+
+
 public class SafeWalk extends Module {
+
+    BlockHitResult result;
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> ledge = sgGeneral.add(new BoolSetting.Builder()
@@ -28,6 +41,14 @@ public class SafeWalk extends Module {
         .defaultValue(true)
         .build()
     );
+    private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
+        .name("min fall height")
+        .description("the min height the player is allowed to fall from")
+        .defaultValue(4)
+        .build()
+    );
+
+
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
@@ -49,7 +70,15 @@ public class SafeWalk extends Module {
 
     @EventHandler
     private void onClipAtLedge(ClipAtLedgeEvent event) {
-        if (!mc.player.isSneaking()) event.setClip(ledge.get());
+        result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, height.get(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+        if (result != null && result.getType() == HitResult.Type.MISS)
+        {
+
+            if (!mc.player.isSneaking()) event.setClip(ledge.get());
+        }
+        // stop player form falling down
+
+
     }
 
     @EventHandler
@@ -65,6 +94,8 @@ public class SafeWalk extends Module {
             event.shape = VoxelShapes.fullCube();
         }
     }
+
+
 
     private boolean blockFilter(Block block) {
         return (block instanceof AbstractFireBlock
