@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
 import meteordevelopment.meteorclient.systems.modules.movement.Sneak;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.systems.modules.player.Portals;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -33,6 +34,8 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.network.message.*;
 import net.minecraft.text.Text;
@@ -45,6 +48,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import net.minecraft.entity.EquipmentSlot;
+
+
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
@@ -63,6 +69,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     private void onDropSelectedItem(boolean dropEntireStack, CallbackInfoReturnable<Boolean> info) {
         if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(getMainHandStack())).isCancelled()) info.setReturnValue(false);
     }
+
 
     @Inject(method = "sendChatMessage(Ljava/lang/String;Lnet/minecraft/text/Text;)V", at = @At("HEAD"), cancellable = true)
     private void onSendChatMessage(String message, Text preview, CallbackInfo info) {
@@ -106,7 +113,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
     private void onIsSneaking(CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().isActive(Scaffold.class)) info.setReturnValue(false);
+        // if (Modules.get().isActive(Scaffold.class)) info.setReturnValue(false);
     }
 
     @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
