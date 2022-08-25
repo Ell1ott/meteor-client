@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -92,8 +93,39 @@ public class FreeLook extends Module {
         return isActive() && mode.get() == Mode.Camera;
     }
 
+    // @EventHandler
+    // private void onTick(TickEvent.Post event) {
+    //     if (arrows.get()) {
+    //         for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
+    //             switch (mode.get()) {
+    //                 case Player -> {
+    //                     if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= 0.5;
+    //                     if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += 0.5;
+    //                     if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= 0.5;
+    //                     if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += 0.5;
+    //                 }
+    //                 case Camera -> {
+    //                     float yaw = mc.player.getYaw();
+    //                     float pitch = mc.player.getPitch();
+
+    //                     if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) yaw -= 0.5;
+    //                     if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) yaw += 0.5;
+    //                     if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) pitch -= 0.5;
+    //                     if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) pitch += 0.5;
+
+    //                     mc.player.setYaw(yaw);
+    //                     mc.player.setPitch(pitch);
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     mc.player.setPitch(Utils.clamp(mc.player.getPitch(), -90, 90));
+    //     cameraPitch = Utils.clamp(cameraPitch, -90, 90);
+    // }
+
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onRender(Render3DEvent event) {
         if (arrows.get()) {
             for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
                 switch (mode.get()) {
@@ -122,6 +154,8 @@ public class FreeLook extends Module {
         mc.player.setPitch(Utils.clamp(mc.player.getPitch(), -90, 90));
         cameraPitch = Utils.clamp(cameraPitch, -90, 90);
     }
+
+
 
     public enum Mode {
         Player,
