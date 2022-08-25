@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameMode;
 
@@ -36,8 +37,13 @@ public class TargetUtils {
 
     public static void getList(List<Entity> targetList, Predicate<Entity> isGood, SortPriority sortPriority, int maxCount) {
         targetList.clear();
+        MobEntity mEntity ;
+
+
+
 
         for (Entity entity : mc.world.getEntities()) {
+            ;
             if (entity != null && isGood.test(entity)) targetList.add(entity);
         }
 

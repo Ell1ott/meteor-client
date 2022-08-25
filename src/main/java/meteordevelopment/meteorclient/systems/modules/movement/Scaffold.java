@@ -213,15 +213,15 @@ public class Scaffold extends Module {
         if (item.getHand() == null && !autoSwitch.get()) return;
 
         // Move down if shifting
-        if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed()) {
-            if (lastSneakingY - mc.player.getY() < 0.1) {
-                lastWasSneaking = false;
-                return;
-            }
-        } else {
-            lastWasSneaking = false;
-        }
-        if (!lastWasSneaking) lastSneakingY = mc.player.getY();
+        // if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed()) {
+        //     if (lastSneakingY - mc.player.getY() < 0.1) {
+        //         lastWasSneaking = false;
+        //         return;
+        //     }
+        // } else {
+        //     lastWasSneaking = false;
+        // }
+        // if (!lastWasSneaking) lastSneakingY = mc.player.getY();
 
         if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get()) {
             mc.player.setVelocity(0, 0.42f, 0);

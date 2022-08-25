@@ -58,6 +58,8 @@ public class ElytraBoost extends Module {
         .build()
     );
 
+
+
     private final List<FireworkRocketEntity> fireworks = new ArrayList<>();
 
     public ElytraBoost() {
