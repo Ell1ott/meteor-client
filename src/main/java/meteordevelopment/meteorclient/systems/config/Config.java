@@ -159,8 +159,18 @@ public class Config extends System<Config> {
     .build()
     );
 
+    public final Setting<Integer>  maxdis = sgRot.add(new IntSetting.Builder()
+    .name("max attack distance")
+    .description("the max distance that attacking should be allowed (360 for always)")
+    .defaultValue(10)
+    .min(1)
+    .sliderMax(180)
+    .visible(() -> Smooth.get())
+    .build()
+    );
+
     public final Setting<RotationMode> rotmode = sgRot.add(new EnumSetting.Builder<RotationMode>()
-        .name("rotate")
+        .name("rotation mode")
         .description("Determines when you should rotate towards the target.")
         .defaultValue(RotationMode.linear)
         .visible(() -> Smooth.get())
