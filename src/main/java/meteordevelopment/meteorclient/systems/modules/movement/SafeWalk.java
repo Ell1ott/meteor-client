@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket.Flag;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.shape.VoxelShapes;
@@ -30,9 +31,12 @@ import com.ibm.icu.util.BytesTrie.Result;
 
 
 
+
+
 public class SafeWalk extends Module {
 
     BlockHitResult result;
+    public boolean sneaking = false;
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> ledge = sgGeneral.add(new BoolSetting.Builder()
@@ -41,6 +45,15 @@ public class SafeWalk extends Module {
         .defaultValue(true)
         .build()
     );
+
+    private final Setting<Boolean> sneak = sgGeneral.add(new BoolSetting.Builder()
+        .name("sneak")
+        .description("sneaks at edge")
+        .defaultValue(true)
+        .build()
+    );
+
+
     private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
         .name("min fall height")
         .description("the min height the player is allowed to fall from")
@@ -67,19 +80,27 @@ public class SafeWalk extends Module {
     public SafeWalk() {
         super(Categories.Movement, "safe-walk", "Prevents you from walking off blocks or on blocks that you dont want.");
     }
+    @Override
+    public void onActivate() {
+        sneaking = false;
+    }
 
     @EventHandler
     private void onClipAtLedge(ClipAtLedgeEvent event) {
         result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, height.get(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
         if (result != null && result.getType() == HitResult.Type.MISS)
         {
-
-            if (!mc.player.isSneaking()) event.setClip(ledge.get());
+            if(sneak.get()) sneaking = true;
+            event.setClip(ledge.get());
+            // if (!mc.player.isSneaking()) event.setClip(ledge.get());
         }
+
+        else sneaking = false;
         // stop player form falling down
 
 
     }
+
 
     @EventHandler
     private void onCollisionShape(CollisionShapeEvent event) {
@@ -94,6 +115,14 @@ public class SafeWalk extends Module {
             event.shape = VoxelShapes.fullCube();
         }
     }
+
+    public boolean shouldSneak(){
+        if (!mc.player.isOnGround()) sneaking = false;
+        return sneaking;
+    }
+
+
+
 
 
 
