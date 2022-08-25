@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -43,6 +44,7 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -267,6 +269,8 @@ public class KillAura extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+
+        mc.player.setSneaking(true);
         if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
 
         TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
@@ -336,6 +340,7 @@ public class KillAura extends Module {
     }
 
     private boolean entityCheck(Entity entity) {
+
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (noRightClick.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return false;
@@ -344,6 +349,7 @@ public class KillAura extends Module {
         if(Anger.get() && entity instanceof EndermanEntity mobEntity) if(!mobEntity.isAngry()) return false; //if(mobEntity.getAngryAt() == mc.player.getUuid()) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && PlayerUtils.distanceTo(entity) > wallsRange.get()) return false;
+
         if (ignoreTamed.get()) {
             if (entity instanceof Tameable tameable
                 && tameable.getOwnerUuid() != null
@@ -385,7 +391,10 @@ public class KillAura extends Module {
         if (Math.random() > hitChance.get() / 100) return;
 
         if (rotation.get() == RotationMode.OnHit) rotate(target, () -> hitEntity(target));
-        else hitEntity(target);
+        else{
+            Rotations.calcDis();
+            if(Rotations.dis < Config.get().maxdis.get()) hitEntity(target);
+        }
     }
 
     private void hitEntity(Entity target) {
@@ -394,7 +403,7 @@ public class KillAura extends Module {
     }
 
     private void rotate(Entity target, Runnable callback) {
-        Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body), callback);
+        Rotations.rotate(Rotations.getYaw(target.getEyePos()), Rotations.getPitch(target, Target.Body), callback);
     }
 
     private boolean itemInHand() {

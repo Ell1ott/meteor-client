@@ -58,6 +58,12 @@ public class Rotations {
     public static boolean shouldmoveback;
 
 
+    public static Double dis = 180.0;
+
+    static double yawdis;
+    static double pitchdis;
+
+
 
 
 
@@ -69,7 +75,7 @@ public class Rotations {
     public static void rotate(double yaw, double pitch, int vpriority, boolean vclientSide, Runnable vcallback) {
 
 
-        rYaw = yaw;
+        rYaw = yaw;  //the yaw that we should be rotating to
         rPitch = pitch;
         priority = vpriority;
         clientSide = vclientSide;
@@ -113,6 +119,20 @@ public class Rotations {
 
     }
 
+    public static void calcDis()
+    {
+
+        yawdis = rYaw - pYaw;
+        pitchdis = rPitch - pPitch;
+
+        if (yawdis < -180) {yawdis = yawdis + 360;}
+        if (yawdis > 180) {yawdis =  yawdis - 360;}
+
+        dis = Math.sqrt(yawdis * yawdis + pitchdis * pitchdis);
+
+
+    }
+
     public static void rotateto(){
         if (Config.get().Smooth.get()){
             Double relativespeed = 1.0;
@@ -121,13 +141,7 @@ public class Rotations {
 
 
 
-            double yawdis = rYaw - pYaw;
-            double pitchdis = rPitch - pPitch;
-
-            if (yawdis < -180) {yawdis = yawdis + 360;}
-            if (yawdis > 180) {yawdis =  yawdis - 360;}
-
-            Double dis = Math.sqrt(yawdis * yawdis + pitchdis * pitchdis);
+            calcDis();
 
             if(Config.get().rotmode.get() == Config.RotationMode.smoothstep)
             {
@@ -217,7 +231,7 @@ public class Rotations {
 
             i++;
         } else if (lastRotation != null) {
-            if (lastRotationTimer >= Config.get().rotationHoldTicks.get()) {
+            if (lastRotationTimer >= 1) {
                 resetLastRotation();
                 rotating = false;
             } else {
@@ -246,7 +260,10 @@ public class Rotations {
     private static void onSendMovementPacketsPost(SendMovementPacketsEvent.Post event) {
         if (!rotations.isEmpty()) {
             if (mc.cameraEntity == mc.player) {
+
                 rotations.get(i - 1).runCallback();
+
+
 
                 if (rotations.size() == 1) lastRotation = rotations.get(i - 1);
 
