@@ -85,6 +85,15 @@ public class ESP extends Module {
         .build()
     );
 
+    private final Setting<Double> predict = sgGeneral.add(new DoubleSetting.Builder()
+        .name("predict")
+        .description("The distance from an entity where the color begins to fade.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(30)
+        .build()
+    );
+
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select specific entities.")
@@ -181,6 +190,11 @@ public class ESP extends Module {
             double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
             double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
             double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
+            if(predict.get() != 0){
+                x += entity.getVelocity().x * (predict.get() / 10);
+                // y += entity.getVelocity().y * (predict.get() / 10);
+                z += entity.getVelocity().z * (predict.get() / 10);
+            }
 
             Box box = entity.getBoundingBox();
             event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
