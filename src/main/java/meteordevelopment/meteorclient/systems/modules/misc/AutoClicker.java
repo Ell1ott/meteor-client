@@ -14,16 +14,19 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.util.math.Vec3d;
 
 public class AutoClicker extends Module {
     public enum Mode {
         Hold,
-        Press
+        Press,
+
     }
 
     public enum Button {
         Right,
-        Left
+        Left,
+        place
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -50,6 +53,18 @@ public class AutoClicker extends Module {
             .sliderMax(60)
             .build()
     );
+
+
+    private final Setting<Integer> reach = sgGeneral.add(new IntSetting.Builder()
+            .name("reach")
+            .description("the reach you have when placing bloks.")
+            .defaultValue(4)
+            .min(0)
+            .sliderMax(8)
+            .build()
+    );
+
+
 
     private int timer;
 
@@ -83,8 +98,12 @@ public class AutoClicker extends Module {
                 timer++;
                 if (!(delay.get() > timer)) {
                     switch (button.get()) {
-                        case Left -> Utils.leftClick();
-                        case Right -> Utils.rightClick();
+                        case Left: Utils.leftClick();
+                        case Right: Utils.rightClick();
+                        case place:
+                            Vec3d vec3d = mc.player.getRotationVec(1.0F).normalize();
+                            
+
                     }
                     timer = 0;
                 }
