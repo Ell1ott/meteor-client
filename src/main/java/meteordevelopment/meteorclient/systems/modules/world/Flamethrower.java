@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderFogComponent.None;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -13,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.starscript.compiler.Expr.Null;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -107,6 +109,7 @@ public class Flamethrower extends Module {
             boolean success = selectSlot();
 
             if (success) {
+
                 this.entity = entity;
 
                 if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity.getBlockPos()), Rotations.getPitch(entity.getBlockPos()), -100, this::interact);
@@ -118,6 +121,7 @@ public class Flamethrower extends Module {
     }
 
     private void interact() {
+        if (entity == null) return;
         Block block = mc.world.getBlockState(entity.getBlockPos()).getBlock();
         Block bottom = mc.world.getBlockState(entity.getBlockPos().down()).getBlock();
         if (block == Blocks.WATER || bottom == Blocks.WATER || bottom == Blocks.DIRT_PATH) return;
