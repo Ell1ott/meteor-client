@@ -14,6 +14,9 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.Perspective;
+import net.minecraft.structure.OceanMonumentGenerator.DoubleYRoom;
+import net.minecraft.util.math.Vec3d;
+
 import org.lwjgl.glfw.GLFW;
 
 public class FreeLook extends Module {
@@ -49,6 +52,12 @@ public class FreeLook extends Module {
 
     public final Setting<Boolean> arrows = sgArrows.add(new BoolSetting.Builder()
             .name("arrows-control-opposite")
+            .description("Allows you to control the other entities rotation with the arrow keys.")
+            .defaultValue(true)
+            .build()
+    );
+    public final Setting<Boolean> vel = sgArrows.add(new BoolSetting.Builder()
+            .name("velocity")
             .description("Allows you to control the other entities rotation with the arrow keys.")
             .defaultValue(true)
             .build()
@@ -149,6 +158,10 @@ public class FreeLook extends Module {
                     }
                 }
             }
+        }
+
+        if(vel.get()){
+            cameraYaw = (float)Math.asin(mc.player.getVelocity().getX());
         }
 
         mc.player.setPitch(Utils.clamp(mc.player.getPitch(), -90, 90));
