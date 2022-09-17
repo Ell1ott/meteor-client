@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import com.google.common.collect.Sets;
+
+import baritone.command.defaults.ForceCancelCommand;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -33,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 public class VeinMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
@@ -51,8 +55,13 @@ public class VeinMiner extends Module {
         new Vec3i(1, 1, -1), new Vec3i(0, 1, -1), new Vec3i(-1, 1, -1)
     );
 
+    private final Setting<ModuleModeList> ModuleMode = sgGeneral.add(new EnumSetting.Builder<ModuleModeList>()
+        .name("Mode")
+        .description("Module mode")
+        .defaultValue(ModuleModeList.vein)
+        .build()
+    );
     // General
-
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Which blocks to select.")
@@ -60,8 +69,9 @@ public class VeinMiner extends Module {
         .build()
     );
 
-    private final Setting<ListMode> mode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
-        .name("mode")
+
+    private final Setting<ListMode> listmode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
+        .name("Selection mode")
         .description("Selection mode.")
         .defaultValue(ListMode.Whitelist)
         .build()
@@ -153,6 +163,13 @@ public class VeinMiner extends Module {
 
         return false;
     }
+    private boolean isMiningBlock() {
+        for (MyBlock block : blocks) {
+            return true;
+        }
+
+        return false;
+    }
 
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
@@ -160,9 +177,9 @@ public class VeinMiner extends Module {
 
         if (state.getHardness(mc.world, event.blockPos) < 0)
             return;
-        if (mode.get() == ListMode.Whitelist && !selectedBlocks.get().contains(state.getBlock()))
+        if (listmode.get() == ListMode.Whitelist && !selectedBlocks.get().contains(state.getBlock()))
             return;
-        if (mode.get() == ListMode.Blacklist && selectedBlocks.get().contains(state.getBlock()))
+        if (listmode.get() == ListMode.Blacklist && selectedBlocks.get().contains(state.getBlock()))
             return;
 
         foundBlockPositions.clear();
@@ -177,6 +194,21 @@ public class VeinMiner extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if(ModuleMode.get() == ModuleModeList.always)
+        {
+            foundBlockPositions.clear();
+
+            if (!isMiningBlock()) {
+                // MyBlock block = blockPool.get();
+
+                // blocks.add(block);
+                
+                mineNearbyBlocks(selectedBlocks.get().get(0).asItem(), new BlockPos(mc.player.getPos()), mc.player.getMovementDirection(), 0);
+                // mineNearbyBlocks(mc.player.getPos());
+                // mineNearbyBlocks(null, mc.player.getPos(), mc.player.getRotationClient(), depth.get());
+
+            }
+        }
         blocks.removeIf(MyBlock::shouldRemove);
 
         if (!blocks.isEmpty()) {
@@ -256,29 +288,57 @@ public class VeinMiner extends Module {
         }
     }
 
-    private void mineNearbyBlocks(Item item, BlockPos pos, Direction dir, int depth) {
+    // public void findblocksnearplayer(){
+
+
+    //     for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
+    //         for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
+    //             for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopY(), mc.player.getY() + placeRange.get()); y++) {
+    //                 bp.set(x, y, z);
+    //                 if (!mc.world.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
+    //             }
+    //         }
+    //     }
+    // }
+    private void mineNearbyBlocks(@Nullable Item item, BlockPos pos, Direction dir, int depth) {
         if (depth<=0) return;
         if (foundBlockPositions.contains(pos)) return;
         foundBlockPositions.add(pos);
         if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.interactionManager.getReachDistance()) return;
         for(Vec3i neighbourOffset: blockNeighbours) {
             BlockPos neighbour = pos.add(neighbourOffset);
-            if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
-                MyBlock block = blockPool.get();
-                block.set(neighbour,dir);
-                blocks.add(block);
-                mineNearbyBlocks(item, neighbour, dir, depth-1);
+            switch(ModuleMode.get()) {
+                case vein:
+                    if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
+                        MyBlock block = blockPool.get();
+                        block.set(neighbour,dir);
+                        blocks.add(block);
+                        mineNearbyBlocks(item, neighbour, dir, depth-1);
+                    }
+                case always:
+                    for (Block _block : selectedBlocks.get()) {
+                        if (mc.world.getBlockState(neighbour).getBlock().asItem() == _block.asItem()) {
+                            MyBlock block = blockPool.get();
+                            block.set(neighbour,dir);
+                            blocks.add(block);
+                            mineNearbyBlocks(item, neighbour, dir, depth-1);
+                    }
+                }
             }
         }
     }
 
     @Override
     public String getInfoString() {
-        return mode.get().toString() + " (" + selectedBlocks.get().size() + ")";
+        return listmode.get().toString() + " (" + selectedBlocks.get().size() + ")";
     }
 
     public enum ListMode {
         Whitelist,
         Blacklist
+    }
+    public enum ModuleModeList {
+        vein,
+        always
     }
 }
