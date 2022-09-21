@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -23,6 +24,8 @@ import net.minecraft.util.math.Vec3d;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mojang.authlib.minecraft.client.MinecraftClient;
+
 // import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderFogComponent.None;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -34,6 +37,7 @@ import java.lang.Math;
 public class Rotations {
     private static final Pool<Rotation> rotationPool = new Pool<>(Rotation::new);
     private static final List<Rotation> rotations = new ArrayList<>();
+    public static Rotation rotation = rotationPool.get();
     public static float serverYaw;
     public static float serverPitch;
     public static int rotationTimer;
@@ -46,12 +50,12 @@ public class Rotations {
     private static boolean sentLastRotation;
     public static boolean rotating = false;
 
-    public static double pYaw = -1000;
-    public static double pPitch = -1000;
+    public static double pYaw = 0;
+    public static double pPitch = 0;
 
     public static double rYaw;
-
     public static double rPitch;
+
     public static int priority;
     public static boolean clientSide;
     public static Runnable callback;
@@ -62,6 +66,10 @@ public class Rotations {
 
     static double yawdis;
     static double pitchdis;
+
+    public static boolean rendering;
+
+    static float speed;
 
 
 
@@ -85,9 +93,7 @@ public class Rotations {
 
         resetLastRotation();
     }
-
-    @EventHandler
-    private static void onTick(TickEvent.Pre event) {
+    public static void rotatetorotation(){
         rotationTimer++;
         if (mc.world != null){
 
@@ -96,7 +102,7 @@ public class Rotations {
                 pPitch = mc.player.getPitch();
             }
             else if (lastRotationTimer <= Config.get().rotationHoldTicks.get()){//if (serverYaw != rYaw && serverPitch != rPitch){
-                lastRotationTimer++;
+
                 shouldmoveback = true;
 
                 rotateto();
@@ -108,13 +114,37 @@ public class Rotations {
 
                 rotateto();
 
-                if (serverYaw == mc.player.getYaw() && serverPitch == mc.player.getPitch()) shouldmoveback = false;
+                if (serverYaw == mc.player.getYaw() && serverPitch == mc.player.getPitch()) {shouldmoveback = false; rotating = false;}
+                if (mc.player.getYaw() == pYaw && mc.player.getPitch() == pPitch) rotating = false;
 
             }
 
 
 
         }
+    }
+
+
+    @EventHandler
+    private static void onTick(TickEvent.Pre event) {
+        speed = Config.get().Speed.get();
+        if(!Config.get().OnFrame.get()) rotatetorotation();
+        lastRotationTimer++;
+        if(rotating) rotations.add(0, rotation);
+
+
+
+        // if(mc.world != null && mc.player != null) mc.player.sendChatMessage(""+mc.getLastFrameDuration(), null);
+    }
+
+    @EventHandler
+    private static void onRender3D(Render3DEvent event) {
+        // rendering = true;
+        speed = Config.get().Speed.get() * (mc.getLastFrameDuration());
+
+        if(Config.get().OnFrame.get()) rotatetorotation();
+        // setCamRotation(rotation.yaw, rotation.yaw);
+
 
 
     }
@@ -136,10 +166,6 @@ public class Rotations {
     public static void rotateto(){
         if (Config.get().Smooth.get()){
             Double relativespeed = 1.0;
-            int speed = Config.get().Speed.get();
-
-
-
 
             calcDis();
 
@@ -147,41 +173,33 @@ public class Rotations {
             {
                 relativespeed = Math.min(dis * Config.get().p.get() / 100 + Config.get().Add.get(), Config.get().cap.get());
             }
-            // if (("" + dis) != "NaN")
-            // {
-
-            //     mc.player.sendChatMessage("dis:" + dis, null);
-            //     mc.player.sendChatMessage("yaw:" + closestToZero((yawdis / dis) * speed, yawdis), null);
-            //     mc.player.sendChatMessage("pitch:" + pitchdis, null);
-            // }
 
 
             if (yawdis != 0)
             {
-                rYaw = pYaw + closestToZero((yawdis / dis) * speed * relativespeed, yawdis);
+                pYaw = pYaw + closestToZero((yawdis / dis) * speed * relativespeed, yawdis);
             }
             if(pitchdis != 0)
             {
-                rPitch = pPitch + closestToZero((pitchdis / dis) * speed * relativespeed, pitchdis);
+                pPitch = pPitch + closestToZero((pitchdis / dis) * speed * relativespeed, pitchdis);
             }
 
-            pYaw = rYaw;
-            pPitch = rPitch;
+            // pYaw = rYaw;
+            // pPitch = rPitch;
 
-            // setCamRotation(yaw, pitch);
+            setCamRotation(pYaw, pPitch);
         }
 
-        Rotation rotation = rotationPool.get();
-        rotation.set(rYaw, rPitch, priority, clientSide, callback);
+
+        rotation.set(pYaw, pPitch, priority, clientSide, callback);
 
 
-        int i = 0;
-        for (; i < rotations.size(); i++) {
-            if (priority > rotations.get(i).priority) break;
+        // int i = 0;
+        // for (; i < rotations.size(); i++) {
+        //     if (priority > rotations.get(i).priority) break;
         }
 
-        rotations.add(i, rotation);
-    }
+
 
 
     public static double closestToZero(int num, Double num2){
@@ -275,7 +293,7 @@ public class Rotations {
 
                 setCamRotation(rotation.yaw, rotation.pitch);
                 if (rotation.clientSide) setClientRotation(rotation);
-                rotation.sendPacket();
+                // rotation.sendPacket();
                 if (rotation.clientSide) resetPreRotation();
 
                 if (i == rotations.size() - 1) lastRotation = rotation;

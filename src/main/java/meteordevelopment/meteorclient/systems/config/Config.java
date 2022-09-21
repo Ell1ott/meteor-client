@@ -177,6 +177,14 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Boolean> OnFrame = sgRot.add(new BoolSetting.Builder()
+        .name("On Frame")
+        .description("if the player should rotate on per frame or per tick")
+        .defaultValue(true)
+        .visible(() -> Smooth.get())
+        .build()
+    );
+
     public final Setting<Integer>  p = sgRot.add(new IntSetting.Builder()
     .name("% (smoothstep)")
     .description("how much of the dis the player should rotate")

@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import baritone.api.BaritoneAPI;
+import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
@@ -56,6 +57,13 @@ public class NoFall extends Module {
 
     private final Setting<Boolean> anchor = sgGeneral.add(new BoolSetting.Builder()
         .name("anchor")
+        .description("Centers the player and reduces movement when using bucket or air place mode.")
+        .defaultValue(true)
+        .visible(() -> mode.get() != Mode.Packet)
+        .build()
+    );
+    private final Setting<Boolean> test = sgGeneral.add(new BoolSetting.Builder()
+        .name("test")
         .description("Centers the player and reduces movement when using bucket or air place mode.")
         .defaultValue(true)
         .visible(() -> mode.get() != Mode.Packet)
@@ -146,6 +154,8 @@ public class NoFall extends Module {
             }
         }
     }
+
+
 
     private void useBucket(FindItemResult bucket, boolean placedWater) {
         if (!bucket.found()) return;
