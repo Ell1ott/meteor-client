@@ -67,7 +67,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         isIndigoPresent = FabricLoader.getInstance().isModLoaded("fabric-renderer-indigo");
         isOriginsPresent = FabricLoader.getInstance().isModLoaded("origins");
         isSodiumPresent = FabricLoader.getInstance().isModLoaded("sodium");
-        isCanvasPresent = FabricLoader.getInstance().isModLoaded("canvas");
+        // isCanvasPresent = FabricLoader.getInstance().isModLoaded("canvas");
 
         loaded = true;
     }
@@ -91,9 +91,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
         else if (mixinClassName.startsWith(mixinPackage + ".indigo")) {
             return isIndigoPresent;
         }
-        else if (mixinClassName.startsWith(mixinPackage + ".canvas")) {
-            return isCanvasPresent;
-        }
+        // else if (mixinClassName.startsWith(mixinPackage + ".canvas")) {
+        //     return isCanvasPresent;
+        // }
 
 
         return true;
