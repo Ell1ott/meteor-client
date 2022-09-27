@@ -5,16 +5,18 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.orbit.EventHandler;
 
 public class Fullbright extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
+    int anim = 0;
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("The mode to use for Fullbright.")
@@ -25,9 +27,9 @@ public class Fullbright extends Module {
     private final Setting<Integer> minimumLightLevel = sgGeneral.add(new IntSetting.Builder()
         .name("minimum-light-level")
         .description("Minimum light level when using Luminance mode.")
-        .visible(() -> mode.get() == Mode.Luminance)
+        // .visible(() -> mode.get() == Mode.Luminance)
         .defaultValue(8)
-        .range(0, 15)
+        .range(0, 255)
         .sliderMax(15)
         .onChanged(integer -> {
             if (mc.worldRenderer != null) mc.worldRenderer.reload();
@@ -42,6 +44,12 @@ public class Fullbright extends Module {
     @Override
     public void onActivate() {
         if (mode.get() == Mode.Luminance) mc.worldRenderer.reload();
+        anim = 0;
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if(anim<255) anim += minimumLightLevel.get();
     }
 
     @Override
@@ -56,6 +64,9 @@ public class Fullbright extends Module {
 
     public boolean getGamma() {
         return isActive() && mode.get() == Mode.Gamma;
+    }
+    public int getGammaA() {
+        return anim;
     }
 
     public enum Mode {
