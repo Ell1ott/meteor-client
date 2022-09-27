@@ -20,11 +20,17 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(LightmapTextureManager.class)
 public class LightmapTextureManagerMixin {
+
+    Integer light;
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/texture/NativeImage;setColor(III)V"))
     private void update(Args args) {
         if (Modules.get().get(Fullbright.class).getGamma() || Modules.get().isActive(Xray.class)) {
+            light =(Integer) (getIntFromColor(Modules.get().get(Fullbright.class).getGammaA()));
 
-             args.set(2, Math.min(Integer.decode(args.get(2).toString()) + (Integer)(getIntFromColor(Modules.get().get(Fullbright.class).getGammaA(), Modules.get().get(Fullbright.class).getGammaA(), Modules.get().get(Fullbright.class).getGammaA())), 0xFFFFFFFF));
+            light += Integer.decode(args.get(2).toString());
+            // light = light < 0 ? 0xFFFFFFFF : light;
+
+            args.set(2, light);
         }
     }
 
@@ -37,7 +43,12 @@ public class LightmapTextureManagerMixin {
         Red = (Red << 16) & 0x00FF0000; //Shift red 16-bits and mask out other stuff
         Green = (Green << 8) & 0x0000FF00; //Shift Green 8-bits and mask out other stuff
         Blue = Blue & 0x000000FF; //Mask out anything not blue.
-
+        return 0xFF000000 | Red | Green | Blue; //0xFF000000 for 100% Alpha. Bitwise OR everything together.
+    }
+    public int getIntFromColor(int brigtness){
+        int Red = (brigtness << 16) & 0x00FF0000; //Shift red 16-bits and mask out other stuff
+        int Green = (brigtness << 8) & 0x0000FF00; //Shift Green 8-bits and mask out other stuff
+        int Blue = brigtness & 0x000000FF; //Mask out anything not blue.
         return 0xFF000000 | Red | Green | Blue; //0xFF000000 for 100% Alpha. Bitwise OR everything together.
     }
 
