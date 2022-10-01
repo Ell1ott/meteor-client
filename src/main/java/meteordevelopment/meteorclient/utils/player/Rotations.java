@@ -132,7 +132,12 @@ public class Rotations {
         speed = Config.get().Speed.get();
         if(!Config.get().OnFrame.get()) rotatetorotation();
         lastRotationTimer++;
-        if(rotating) rotations.add(0, rotation);
+        if(rotating) {
+            rotations.add(0, rotation);
+            mc.player.sendChatMessage(""+mc.player.getYaw() + " "+pYaw, null);
+
+
+        }
 
 
 

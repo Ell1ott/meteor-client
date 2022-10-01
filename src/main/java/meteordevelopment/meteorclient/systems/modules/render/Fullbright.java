@@ -6,12 +6,15 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.settings.ColorSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 
 public class Fullbright extends Module {
@@ -33,9 +36,17 @@ public class Fullbright extends Module {
         .sliderMax(15)
         .onChanged(integer -> {
             if (mc.worldRenderer != null) mc.worldRenderer.reload();
-        })
+    })
         .build()
     );
+
+    private final Setting<SettingColor> Gammacolor = sgGeneral.add(new ColorSetting.Builder()
+        .name("color")
+        .description("The color of the gamma")
+        .defaultValue(new SettingColor(225, 255, 255))
+        .build()
+    );;
+
 
     public Fullbright() {
         super(Categories.Render, "fullbright", "Lights up your world!");
