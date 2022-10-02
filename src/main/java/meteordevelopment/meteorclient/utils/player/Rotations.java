@@ -90,6 +90,10 @@ public class Rotations {
         callback = vcallback;
         runCallback();
         callback = null;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         rotating = true;
 
         resetLastRotation();
