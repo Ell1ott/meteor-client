@@ -88,10 +88,13 @@ public class Rotations {
         priority = vpriority;
         clientSide = vclientSide;
         callback = vcallback;
+<<<<<<< HEAD
         runCallback();
         callback = null;
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> parent of 22a37c9f (wirking  anim but glichy at end)
 
 >>>>>>> Stashed changes
         rotating = true;
@@ -132,7 +135,6 @@ public class Rotations {
 
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
-        runCallback();
         speed = Config.get().Speed.get();
         if(!Config.get().OnFrame.get()) rotatetorotation();
         lastRotationTimer++;
@@ -285,7 +287,7 @@ public class Rotations {
         if (!rotations.isEmpty()) {
             if (mc.cameraEntity == mc.player) {
 
-                // rotations.get(i - 1).runCallback();
+                rotations.get(i - 1).runCallback();
 
 
 
@@ -299,9 +301,7 @@ public class Rotations {
 
                 setCamRotation(rotation.yaw, rotation.pitch);
                 if (rotation.clientSide) setClientRotation(rotation);
-                rotation.sendPacket();
-
-                // runCallback();
+                // rotation.sendPacket();
                 if (rotation.clientSide) resetPreRotation();
 
                 if (i == rotations.size() - 1) lastRotation = rotation;
@@ -393,25 +393,11 @@ public class Rotations {
 
         public void sendPacket() {
             mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround((float) yaw, (float) pitch, mc.player.isOnGround()));
-
-            // runCallback();
+            runCallback();
         }
 
         public void runCallback() {
-            if (dis < Config.get().maxdis.get()){
-
-                if (callback != null) callback.run();
-                // mc.player.sendChatMessage("" +( callback), null);
-            }
-        }
-    }
-
-    public static void runCallback() {
-        calcDis();
-        if (dis < Config.get().maxdis.get()){
-
             if (callback != null) callback.run();
-
         }
     }
 }
