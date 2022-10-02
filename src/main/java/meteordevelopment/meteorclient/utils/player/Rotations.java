@@ -89,7 +89,7 @@ public class Rotations {
         clientSide = vclientSide;
         callback = vcallback;
         runCallback();
-
+        callback = null;
         rotating = true;
 
         resetLastRotation();
