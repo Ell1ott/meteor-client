@@ -89,10 +89,13 @@ public class Rotations {
         clientSide = vclientSide;
         callback = vcallback;
 <<<<<<< HEAD
+<<<<<<< HEAD
         runCallback();
         callback = null;
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> parent of 22a37c9f (wirking  anim but glichy at end)
 =======
 >>>>>>> parent of 22a37c9f (wirking  anim but glichy at end)
 
