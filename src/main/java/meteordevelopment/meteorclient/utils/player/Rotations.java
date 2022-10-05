@@ -89,6 +89,7 @@ public class Rotations {
         clientSide = vclientSide;
         callback = vcallback;
         runCallback();
+        callback = null;
 
         rotating = true;
 
@@ -115,8 +116,10 @@ public class Rotations {
 
                 rotateto();
 
-                if (serverYaw == mc.player.getYaw() && serverPitch == mc.player.getPitch()) {shouldmoveback = false; rotating = false;}
                 if (mc.player.getYaw() == pYaw && mc.player.getPitch() == pPitch) rotating = false;
+                if (serverYaw == mc.player.getYaw() && serverPitch == mc.player.getPitch()) {shouldmoveback = false; rotating = false;}
+
+
 
             }
 
@@ -128,7 +131,6 @@ public class Rotations {
 
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
-        runCallback();
         speed = Config.get().Speed.get();
         if(!Config.get().OnFrame.get()) rotatetorotation();
         lastRotationTimer++;
@@ -136,12 +138,12 @@ public class Rotations {
 
 
 
-        // if(mc.world != null && mc.player != null) mc.player.sendChatMessage(""+mc.getLastFrameDuration(), null);
+
     }
 
     @EventHandler
     private static void onRender3D(Render3DEvent event) {
-        // rendering = true;
+
         speed = Config.get().Speed.get() * (mc.getLastFrameDuration());
 
         if(Config.get().OnFrame.get()) rotatetorotation();
@@ -185,9 +187,8 @@ public class Rotations {
             {
                 pPitch = pPitch + closestToZero((pitchdis / dis) * speed * relativespeed, pitchdis);
             }
-
-            // pYaw = rYaw;
-            // pPitch = rPitch;
+            calcDis();
+            if(yawdis == 0 && pitchdis == 0 && shouldmoveback && !(lastRotationTimer <= Config.get().rotationHoldTicks.get())) rotating = false;
 
             setCamRotation(pYaw, pPitch);
         }
@@ -196,9 +197,6 @@ public class Rotations {
         rotation.set(pYaw, pPitch, priority, clientSide, callback);
 
 
-        // int i = 0;
-        // for (; i < rotations.size(); i++) {
-        //     if (priority > rotations.get(i).priority) break;
         }
 
 
@@ -252,7 +250,7 @@ public class Rotations {
             i++;
         } else if (lastRotation != null) {
             if (lastRotationTimer >= 1) {
-                resetLastRotation();
+                // resetLastRotation();
                 rotating = false;
             } else {
                 setupMovementPacketRotation(lastRotation);
@@ -281,7 +279,6 @@ public class Rotations {
         if (!rotations.isEmpty()) {
             if (mc.cameraEntity == mc.player) {
 
-                // rotations.get(i - 1).runCallback();
 
 
 
@@ -296,8 +293,6 @@ public class Rotations {
                 setCamRotation(rotation.yaw, rotation.pitch);
                 if (rotation.clientSide) setClientRotation(rotation);
                 rotation.sendPacket();
-
-                // runCallback();
                 if (rotation.clientSide) resetPreRotation();
 
                 if (i == rotations.size() - 1) lastRotation = rotation;
@@ -390,16 +385,9 @@ public class Rotations {
         public void sendPacket() {
             mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround((float) yaw, (float) pitch, mc.player.isOnGround()));
 
-            // runCallback();
+
         }
 
-        public void runCallback() {
-            if (dis < Config.get().maxdis.get()){
-
-                if (callback != null) callback.run();
-                // mc.player.sendChatMessage("" +( callback), null);
-            }
-        }
     }
 
     public static void runCallback() {
