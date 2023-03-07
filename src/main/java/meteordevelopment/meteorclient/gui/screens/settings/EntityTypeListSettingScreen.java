@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 
@@ -35,9 +36,9 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
     private String filterText = "";
 
-    private WSection animals, waterAnimals, monsters, ambient, misc;
-    private WTable animalsT, waterAnimalsT, monstersT, ambientT, miscT;
-    int hasAnimal = 0, hasWaterAnimal = 0, hasMonster = 0, hasAmbient = 0, hasMisc = 0;
+    private WSection players, animals, waterAnimals, monsters, ambient, misc;
+    private WTable playersT, animalsT, waterAnimalsT, monstersT, ambientT, miscT;
+    int hasPlayer = 0, hasAnimal = 0, hasWaterAnimal = 0, hasMonster = 0, hasAmbient = 0, hasMisc = 0;
 
     public EntityTypeListSettingScreen(GuiTheme theme, EntityTypeListSetting setting) {
         super(theme, "Select entities");
@@ -64,23 +65,39 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
     @Override
     public void initWidgets() {
-        hasAnimal = hasWaterAnimal = hasMonster = hasAmbient = hasMisc = 0;
+        hasPlayer = hasAnimal = hasWaterAnimal = hasMonster = hasAmbient = hasMisc = 0;
 
         for (EntityType<?> entityType : setting.get().keySet()) {
             if (!setting.get().getBoolean(entityType)) continue;
 
             if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
-                switch (entityType.getSpawnGroup()) {
-                    case CREATURE -> hasAnimal++;
-                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> hasWaterAnimal++;
-                    case MONSTER -> hasMonster++;
-                    case AMBIENT -> hasAmbient++;
-                    case MISC -> hasMisc++;
+                if(entityType == EntityType.PLAYER){
+                    hasPlayer++;
+                }
+                else{
+
+                    switch (entityType.getSpawnGroup()) {
+                        case CREATURE -> hasAnimal++;
+                        case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> hasWaterAnimal++;
+                        case MONSTER -> hasMonster++;
+                        case AMBIENT -> hasAmbient++;
+                        case MISC -> hasMisc++;
+                    }
                 }
             }
         }
 
-        boolean first = animals == null;
+        boolean first = players == null;
+
+        // players
+        List<EntityType<?>> playersE = new ArrayList<>();
+        WCheckbox playersC = theme.checkbox(hasPlayer > 0);
+
+        players = theme.section("players", players != null && players.isExpanded(), playersC);
+        playersC.action = () -> tableChecked(playersE, playersC.checked);
+
+        Cell<WSection> playersCell = add(players).expandX();
+        playersT = players.add(theme.table()).expandX().widget();
 
         // Animals
         List<EntityType<?>> animalsE = new ArrayList<>();
@@ -134,7 +151,11 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
         Consumer<EntityType<?>> entityTypeForEach = entityType -> {
             if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
-                switch (entityType.getSpawnGroup()) {
+                if(entityType == EntityType.PLAYER){
+                    playersE.add(entityType);
+                    addEntityType(playersT, playersC, entityType);
+                }
+                else switch (entityType.getSpawnGroup()) {
                     case CREATURE -> {
                         animalsE.add(entityType);
                         addEntityType(animalsT, animalsC, entityType);
@@ -180,8 +201,9 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
         if (first) {
             int totalCount = (hasWaterAnimal + waterAnimals.cells.size() + monsters.cells.size() + ambient.cells.size() + misc.cells.size()) / 2;
+            // int totalCount = (hasPlayer + hasWaterAnimal) / 2;
 
-            if (totalCount <= 20) {
+            if (totalCount <= 1) {
                 if (animalsT.cells.size() > 0) animals.setExpanded(true);
                 if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(true);
                 if (monstersT.cells.size() > 0) monsters.setExpanded(true);
@@ -226,7 +248,11 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         a.action = () -> {
             if (a.checked) {
                 setting.get().put(entityType, true);
-                switch (entityType.getSpawnGroup()) {
+                if(entityType == EntityType.PLAYER){
+                    if (hasPlayer == 0) tableCheckbox.checked = true;
+                    hasPlayer++;
+                }
+                else switch (entityType.getSpawnGroup()) {
                     case CREATURE -> {
                         if (hasAnimal == 0) tableCheckbox.checked = true;
                         hasAnimal++;
@@ -250,7 +276,11 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 }
             } else {
                 if (setting.get().removeBoolean(entityType)) {
-                    switch (entityType.getSpawnGroup()) {
+                    if(entityType == EntityType.PLAYER){
+                        hasPlayer--;
+                        if (hasPlayer == 0) tableCheckbox.checked = false;
+                    }
+                    else switch (entityType.getSpawnGroup()) {
                         case CREATURE -> {
                             hasAnimal--;
                             if (hasAnimal == 0) tableCheckbox.checked = false;
